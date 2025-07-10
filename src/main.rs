@@ -1,3 +1,7 @@
+use clap::Parser;
+use hm_scripts::Cli;
+
 fn main() {
-    println!("Hello, world!");
+    let mut cli = Cli::parse();
+    cli.run().unwrap();
 }

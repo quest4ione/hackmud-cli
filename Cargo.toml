@@ -2,5 +2,7 @@
 name = "hm-scripts"
 version = "0.1.0"
 edition = "2024"
+description = "Cli tools for working with scripts in the game hackmud"
 
 [dependencies]
+clap = { version = "4.5.41", features = ["derive", "env"] }

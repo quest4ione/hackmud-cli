@@ -1,5 +1,5 @@
 [package]
-name = "hm-scripts"
+name = "hackmud"
 version = "0.1.0"
 edition = "2024"
 description = "Cli tools for working with scripts in the game hackmud"

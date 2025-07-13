@@ -6,7 +6,7 @@ use clap::{Parser, Subcommand};
 use sync::Sync;
 
 #[derive(Parser)]
-/// Cli tools for working with scripts in the game hackmud
+/// Cli tools for the game hackmud
 ///
 /// Provides some handy dandy tools, like printing this help message and the current version
 #[command(version)]

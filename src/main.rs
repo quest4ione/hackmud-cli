@@ -1,7 +1,7 @@
 use std::process::ExitCode;
 
 use clap::Parser;
-use hm_scripts::Cli;
+use hackmud::Cli;
 
 fn main() -> ExitCode {
     Cli::parse().run()

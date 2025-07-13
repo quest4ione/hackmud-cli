@@ -1,1 +1,1 @@
-Cli tools for working with scripts in the game hackmud
+Cli tools for the game hackmud

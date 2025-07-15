@@ -57,7 +57,7 @@ struct User {
 
 #[derive(Args)]
 pub struct Sync {
-    #[arg()]
+    #[arg(default_value = "**/*")]
     scripts: Vec<String>,
 
     #[cfg(any(windows, unix))]

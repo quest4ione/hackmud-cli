@@ -72,6 +72,9 @@ pub struct Sync {
     #[cfg(not(any(windows, unix)))]
     #[arg(long, env = "HMS_HACKMUD_PATH")]
     hackmud_path: PathBufArgument,
+
+    #[arg(short, long)]
+    clean: bool,
 }
 
 impl Sync {
@@ -178,7 +181,25 @@ impl Sync {
 
         let users = self.get_users()?;
 
+        let mut cleaned: usize = 0;
+        let mut script_count: usize = 0;
         for user in users.iter() {
+            if self.clean {
+                match fs::read_dir(user.scripts_path.clone()) {
+                    Ok(files) => {
+                        for file in files {
+                            if let Err(e) = file.and_then(|f| fs::remove_file(f.path())) {
+                                eprintln!("couldnt clean file: {e}");
+                            }
+                            cleaned += 1;
+                        }
+                    }
+                    Err(e) => {
+                        eprintln!("couldn't clean scripts for {}: {e}", user.name);
+                    }
+                };
+            }
+
             let mut user_scripts: HashMap<String, Script> = HashMap::new();
             for script in scripts.iter() {
                 if let Some(user_override) = &script.user_override {
@@ -204,14 +225,17 @@ impl Sync {
                     );
                     continue;
                 }
-                println!("copied {} to {}", script.name, user.name);
+                script_count += 1;
             }
         }
 
         let took = start.elapsed();
+        if self.clean {
+            println!("cleaned {cleaned} scripts");
+        }
         println!(
             "copied {} scripts to {} users in {}ms",
-            scripts.len(),
+            script_count,
             users.len(),
             took.as_millis()
         );

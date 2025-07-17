@@ -1,5 +1,8 @@
 use clap::Args;
-use std::{env, fmt::Display, fs, ops::Deref, path::PathBuf, str::FromStr, time::Instant};
+use std::{
+    collections::HashMap, env, fmt::Display, fs, ops::Deref, path::PathBuf, str::FromStr,
+    time::Instant,
+};
 
 use crate::Cli;
 
@@ -45,7 +48,9 @@ fn default_hackmud_path() -> PathBufArgument {
     )
 }
 
+#[derive(Clone)]
 struct Script {
+    user_override: Option<String>,
     name: String,
     path: PathBuf,
 }
@@ -97,14 +102,17 @@ impl Sync {
                     continue;
                 }
 
-                // i cant unwrap here because of ext guarantees because name might contain non-utf8 chars
                 let name = match path.file_stem().and_then(|name| name.to_str()) {
                     Some(name) => name,
                     None => continue,
                 };
 
+                let mut split = name.split('.').rev();
+                let (name, user_override) = (split.next().unwrap(), split.next());
+
                 scripts.push(Script {
-                    name: name.to_owned(),
+                    user_override: user_override.map(str::to_string),
+                    name: name.to_string(),
                     path,
                 });
             }
@@ -171,7 +179,21 @@ impl Sync {
         let users = self.get_users()?;
 
         for user in users.iter() {
+            let mut user_scripts: HashMap<String, Script> = HashMap::new();
             for script in scripts.iter() {
+                if let Some(user_override) = &script.user_override {
+                    if user_override == &user.name {
+                        user_scripts.insert(script.name.clone(), script.clone());
+                    }
+                    continue;
+                }
+
+                if !user_scripts.contains_key(&script.name) {
+                    user_scripts.insert(script.name.clone(), script.clone());
+                }
+            }
+
+            for script in user_scripts.into_values() {
                 let from = &script.path;
                 let to = &user.scripts_path.join(format!("{}.js", script.name));
 
@@ -182,6 +204,7 @@ impl Sync {
                     );
                     continue;
                 }
+                println!("copied {} to {}", script.name, user.name);
             }
         }
 
